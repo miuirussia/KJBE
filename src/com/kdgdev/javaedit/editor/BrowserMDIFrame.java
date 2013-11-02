@@ -33,6 +33,9 @@ import java.beans.PropertyVetoException;
 import java.beans.XMLDecoder;
 import java.beans.XMLEncoder;
 import java.io.*;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.prefs.Preferences;
@@ -819,18 +822,29 @@ public class BrowserMDIFrame extends BasicMDIFrame {
         return classesFileChooser;
     }
 
-    private void doShowURL(String urlSpec) {
+    public static void openWebpage(URI uri) {
+        Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
+        if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
+            try {
+                desktop.browse(uri);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-        String commandLine;
-        if (System.getProperty("os.name").startsWith("Windows")) {
-            commandLine = "rundll32.exe url.dll,FileProtocolHandler " + urlSpec;
-        } else {
-            commandLine = "netscape " + urlSpec;
-        }
+    public static void openWebpage(URL url) {
         try {
-            Runtime.getRuntime().exec(commandLine);
-        } catch (IOException ignored) {
+            openWebpage(url.toURI());
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
+    }
+
+    private void doShowURL(String urlSpec) throws MalformedURLException {
+
+        openWebpage(new URL(urlSpec));
+
     }
 
     void removeTempFiles() {
@@ -870,7 +884,9 @@ public class BrowserMDIFrame extends BasicMDIFrame {
             } else if (this == actionReload) {
                 doReload();
             } else if (this == actionShowHomepage) {
-                doShowURL("https://github.com/kdgdev/kjbe");
+                try {
+                    doShowURL("https://github.com/miuirussia/KJBE");
+                } catch (MalformedURLException ignored) { }
             } else if (this == actionShowHelp) {
                 try {
                     doShowURL(new File("doc/help.html").getCanonicalFile().toURL().toExternalForm());
