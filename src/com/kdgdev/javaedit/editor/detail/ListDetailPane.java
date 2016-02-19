@@ -93,7 +93,6 @@ public abstract class ListDetailPane extends AbstractDetailPane {
         if (tableModel.getColumnCount() > 6) {
             ButtonColumn bc = new ButtonColumn(table, 6);
         }
-
     }
 
     /**
@@ -326,5 +325,29 @@ public abstract class ListDetailPane extends AbstractDetailPane {
 
             internalFrame.getParentFrame().doReload();
         }
+    }
+
+    public void updateExceptionEntry(int startPc, int endPc, int handlerPc) {
+        //fireEditingStopped();
+
+        String fileName = internalFrame.getFileName();
+        ClassSaver cs = new ClassSaver(ClassSaver.UPDATE_EXCEPTION, fileName, currentMethodIndex, table.getSelectedRow(), startPc, endPc, handlerPc);
+        ProgressDialog progressDialog = new ProgressDialog(internalFrame
+                .getParentFrame(), null, "Removing exception...");
+
+        progressDialog.setRunnable(cs);
+        progressDialog.setVisible(true);
+        if (cs.exceptionOccured()) {
+            ErrorReportWindow er = new ErrorReportWindow(internalFrame
+                    .getParentFrame(), cs.getExceptionVerbose(), "Removing exception failed");
+
+            er.pack();
+            GUIHelper.centerOnParentWindow(er, internalFrame
+                    .getParentFrame());
+            er.setVisible(true);
+        }
+
+
+        internalFrame.getParentFrame().doReload();
     }
 }
