@@ -1,5 +1,13 @@
-Founded on JBE (http://set.ee/jbe/)
+#Java bytecode editor
 
-Updated and reworked by KDev Group
+This project is based on KJBE which is based on JBE.
 
-***add update exception table directly support***
+##New features
+1. support modify exception table directly
+
+##README in KJBE
+> Founded on JBE [JBE](http://set.ee/jbe/)
+
+> Updated and reworked by KDev Group
+
+
