@@ -18,6 +18,7 @@ import org.gjt.jclasslib.structures.attributes.CodeAttribute;
 import org.gjt.jclasslib.structures.attributes.ExceptionTableEntry;
 
 import javax.swing.*;
+import javax.swing.text.StringContent;
 
 
 /**
@@ -130,7 +131,8 @@ public class ExceptionTableDetailPane extends AbstractAttributeListDetailPane {
                 case START_PC_COLUMN_INDEX:
                 case END_PC_COLUMN_INDEX:
                 case HANDLER_PC_COLUMN_INDEX:
-                    return Number.class;
+                    //return DefaultCellEditor.class;
+                    return String.class;
                 case CATCH_TYPE_COLUMN_INDEX:
                     return ListDetailPane.Link.class;
                 case DELETE_BUTTON_COLUMN_INDEX:
@@ -174,7 +176,40 @@ public class ExceptionTableDetailPane extends AbstractAttributeListDetailPane {
         }
 
         public boolean isCellEditable(int rowIndex, int columnIndex) {
-            return columnIndex == DELETE_BUTTON_COLUMN_INDEX;
+            if (columnIndex == START_PC_COLUMN_INDEX
+                    || columnIndex == END_PC_COLUMN_INDEX
+                    || columnIndex == HANDLER_PC_COLUMN_INDEX
+                    || columnIndex == DELETE_BUTTON_COLUMN_INDEX) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+            ExceptionTableEntry exceptionTableEntry = exceptionTable[rowIndex];
+
+            //public void updateExceptionEntry(int startPc, int endPc, int handlerPc) {
+            switch (columnIndex) {
+                case START_PC_COLUMN_INDEX:
+                    updateExceptionEntry(Integer.parseInt(aValue.toString()), exceptionTableEntry.getEndPc(), exceptionTableEntry.getHandlerPc());
+                    break;
+                case END_PC_COLUMN_INDEX:
+                    updateExceptionEntry(exceptionTableEntry.getStartPc(), Integer.parseInt(aValue.toString()), exceptionTableEntry.getHandlerPc());
+                    break;
+                case HANDLER_PC_COLUMN_INDEX:
+                    updateExceptionEntry(exceptionTableEntry.getStartPc(), exceptionTableEntry.getEndPc(), Integer.parseInt(aValue.toString()));
+                    break;
+                case CATCH_TYPE_COLUMN_INDEX:
+                    break;
+                case CATCH_TYPE_VERBOSE_COLUMN_INDEX:
+                    break;
+                case DELETE_BUTTON_COLUMN_INDEX:
+                default:
+                    break;
+            }
+
         }
     }
 

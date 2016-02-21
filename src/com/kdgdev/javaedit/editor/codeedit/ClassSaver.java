@@ -41,6 +41,7 @@ public class ClassSaver implements Runnable {
     public static final int ADD_INTERFACE = 13;
 
     static public final int ADD_FIELD = 14;
+    public static final int UPDATE_EXCEPTION = 15;
 
     private int state;
 
@@ -132,6 +133,17 @@ public class ClassSaver implements Runnable {
         this.state = state;
         this.fileName = fileName;
         this.index = methodIndex;
+        this.exceptionIndex = exceptionIndex;
+    }
+
+    public ClassSaver(int state, String fileName, int methodIndex,
+                      int exceptionIndex, int startPc, int endPc, int handlerPc) {
+        this.state = state;
+        this.fileName = fileName;
+        this.index = methodIndex;
+        this.startPc = startPc;
+        this.endPc = endPc;
+        this.handlerPc = handlerPc;
         this.exceptionIndex = exceptionIndex;
 
     }
@@ -470,6 +482,37 @@ public class ClassSaver implements Runnable {
 
     }
 
+    public void updateException(String fileName, int methodIndex, int exceptionIndex, int startPc,
+                                int endPc, int handlerPc, String handlerClass) {
+        JavaClass javaClass;
+        try {
+            javaClass = new ClassParser(fileName).parse();
+            CodeException[] codeExceptions = javaClass.getMethods()[methodIndex]
+                    .getCode().getExceptionTable();
+
+
+            codeExceptions[exceptionIndex].setStartPC(startPc);
+            codeExceptions[exceptionIndex].setEndPC(endPc);
+            codeExceptions[exceptionIndex].setHandlerPC(handlerPc);
+
+            javaClass.getMethods()[methodIndex].getCode().setExceptionTable(
+                    codeExceptions);
+            javaClass.dump(fileName);
+
+        } catch (ClassFormatException e) {
+            exceptionOccured = true;
+            exceptionVerbose = e.getMessage();
+
+            e.printStackTrace();
+        } catch (IOException e) {
+            exceptionOccured = true;
+            exceptionVerbose = e.getMessage();
+
+            e.printStackTrace();
+        }
+
+    }
+
     public void addMethod(String fileName, int accessFlags, String methodName,
                           String methodDescriptor) {
         try {
@@ -481,7 +524,7 @@ public class ClassSaver implements Runnable {
 
             //constants = javaClass.getConstantPool();
 
-            MethodGen methodGen = new MethodGen(accessFlags, methodName,methodDescriptor, javaClass.getClassName(),new InstructionList(), cpg);
+            MethodGen methodGen = new MethodGen(accessFlags, methodName, methodDescriptor, javaClass.getClassName(), new InstructionList(), cpg);
             methodGen.removeLocalVariables();
             methodGen.removeLineNumbers();
             methodGen.setMaxLocals();
@@ -576,6 +619,9 @@ public class ClassSaver implements Runnable {
             saveConstant(fileName, constInfo, constType);
         } else if (state == SAVE_EXCEPTION) {
             addException(fileName, index, startPc, endPc, handlerPc,
+                    handlerClass);
+        } else if (state == UPDATE_EXCEPTION) {
+            updateException(fileName, index, exceptionIndex, startPc, endPc, handlerPc,
                     handlerClass);
         } else if (state == REMOVE_EXCEPTION) {
             removeException(fileName, index, exceptionIndex);

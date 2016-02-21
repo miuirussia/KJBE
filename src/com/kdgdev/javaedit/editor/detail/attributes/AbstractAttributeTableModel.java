@@ -69,14 +69,15 @@ public abstract class AbstractAttributeTableModel extends AbstractTableModel {
         if (column == 0) {
             return String.valueOf(row);
         } else {
-            if (columnCache == null) {
-                columnCache = new ColumnCache(getRowCount(), getColumnCount() - 1);
-            }
-            Object value = columnCache.getValueAt(row, column - 1);
-            if (value == null) {
-                value = doGetValueAt(row, column);
-                columnCache.setValueAt(row, column - 1, value);
-            }
+//            if (columnCache == null) {
+//                columnCache = new ColumnCache(getRowCount(), getColumnCount() - 1);
+//            }
+//            Object value = columnCache.getValueAt(row, column - 1);
+//            if (value == null) {
+//                value = doGetValueAt(row, column);
+//                columnCache.setValueAt(row, column - 1, value);
+//            }
+            Object value = doGetValueAt(row, column);
 
             return value;
         }
